@@ -30,6 +30,11 @@ function love.update(dt)
         player.y = player.y + player.speed * dt
     end
     
+    for i,z in ipairs(zombies) do
+        z.x = z.x + math.cos(zombiePlayerAngle(z)) * zombie.speed * dt--對radian做cos可以得到x
+        z.y = z.y + math.sin(zombiePlayerAngle(z)) * zombie.speed * dt
+    end  
+
 end
 
 function love.draw()
@@ -61,4 +66,8 @@ function spawnZombie()
     zombie.y = math.random(0,love.graphics.getHeight())
     zombie.speed = 100
     table.insert(zombies, zombie)
+end
+
+function distance(x1,y1,x2,y2)
+    return math.sqrt((x1-x2)^2+(y1-y2)^2)
 end
