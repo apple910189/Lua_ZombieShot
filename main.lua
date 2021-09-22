@@ -12,6 +12,10 @@ function love.load()
 
     zombies = {}
     bullets = {}
+
+    gameState = 2
+    maxTime = 2
+    timer = maxTime
 end
 -- dt updats every frame to be the amount of time in second between
 -- the previous frame and the current one. If the game is running
@@ -38,7 +42,9 @@ function love.update(dt)
         if distance(z.x,z.y,player.x,player.y) < 30 then
             for i,z in ipairs(zombies) do
                 zombies[i] = nil
+                
             end
+            gameState = 1
         end
     end
 
@@ -77,13 +83,22 @@ function love.update(dt)
             table.remove(bullets,i)
         end
     end
+    -- spawn zombie base on timer
+    if gameState == 2 then
+        timer = timer - dt
+        if timer <=0 then
+            spawnZombie()
+            maxTime = 0.95 * maxTime
+            timer = maxTime
+        end
+    end
 end
 
 function love.draw()
     love.graphics.draw(sprites.background,0,0)
     love.graphics.draw(sprites.player,player.x,player.y, playerMouseAngle(), nil,nil, sprites.player:getWidth()/2,sprites.player:getHeight()/2)
 
-    -- zombie shawn and it'sradian
+    -- zombie shawn and it's radian
     for i,z in ipairs(zombies) do
         love.graphics.draw(sprites.zombie, z.x, z.y,zombiePlayerAngle(z),nil,nil,sprites.zombie:getWidth()/2,sprites.zombie:getHeight()/2)
     end
