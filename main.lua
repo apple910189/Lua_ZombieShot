@@ -47,7 +47,13 @@ function love.update(dt)
         b.x = b.x + math.cos(b.direction) * b.speed * dt -- b.direction不能用playerMouseAngle()因為update是所以會一直更新方向
         b.y = b.y + math.sin(b.direction) * b.speed * dt
     end
-
+    -- delete sprites
+    for i=#bullets,1,-1 do
+        local b = bullets[i]
+        if b.x < 0 or b.y < 0 or b.x > love.graphics.getWidth() or b.y > love.graphics.getHeight() then
+            table.remove(bullets, i)
+        end
+    end
 end
 
 function love.draw()
@@ -61,7 +67,7 @@ function love.draw()
 
     --bullet spawn
     for i,b in ipairs(bullets) do
-        love.graphics.draw(sprites.bullet, b.x, b.y)
+        love.graphics.draw(sprites.bullet, b.x, b.y, nil,0.5,nil,sprites.bullet:getWidth()/2, sprites.bullet:getHeight()/2)
     end
 end
 
@@ -97,7 +103,7 @@ function spawnBullet()
     local bullet = {}
     bullet.x = player.x
     bullet.y = player.y
-    bullet.speed = 300
+    bullet.speed = 600
     bullet.direction = playerMouseAngle()
     table.insert(bullets, bullet)
 end
