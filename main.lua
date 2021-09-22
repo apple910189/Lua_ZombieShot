@@ -40,7 +40,7 @@ function love.update(dt)
                 zombies[i] = nil
             end
         end
-    end  
+    end
 
     -- bullet movement
     for i,b in ipairs(bullets) do 
@@ -52,6 +52,29 @@ function love.update(dt)
         local b = bullets[i]
         if b.x < 0 or b.y < 0 or b.x > love.graphics.getWidth() or b.y > love.graphics.getHeight() then
             table.remove(bullets, i)
+        end
+    end
+    -- collision zombie and bullet
+    for i,z in ipairs(zombies) do
+        for j,b in ipairs(bullets) do
+            if distance(z.x,z.y,b.x,b.y) < 20 then
+                z.dead = true
+                b.dead = true
+            end
+        end
+    end
+    -- delete zombie
+    for i=#zombies,1,-1 do
+        local z = zombies[i]
+        if z.dead == true then
+            table.remove(zombies,i)
+        end
+    end
+    -- delete bullet
+    for i=#bullets,1,-1 do
+        local b = bullets[i]
+        if b.dead == true then
+            table.remove(bullets,i)
         end
     end
 end
@@ -90,20 +113,22 @@ end
 function zombiePlayerAngle(enemy)
     return math.atan2(player.y-enemy.y, player.x-enemy.x)
 end 
-
+-- spawn zombie
 function spawnZombie()
     local zombie = {}
     zombie.x = math.random(0,love.graphics.getWidth())
     zombie.y = math.random(0,love.graphics.getHeight())
     zombie.speed = 100
+    zombie.dead = false
     table.insert(zombies, zombie)
 end
-
+-- spawn bullet
 function spawnBullet()
     local bullet = {}
     bullet.x = player.x
     bullet.y = player.y
     bullet.speed = 600
+    bullet.dead = false
     bullet.direction = playerMouseAngle()
     table.insert(bullets, bullet)
 end
