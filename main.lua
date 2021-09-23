@@ -1,4 +1,6 @@
 function love.load()
+    math.randomseed(os.time())
+
     sprites = {}
     sprites.background = love.graphics.newImage('sprites/background.png')
     sprites.bullet = love.graphics.newImage('sprites/bullet.png')
@@ -10,10 +12,13 @@ function love.load()
     player.y = love.graphics.getHeight() / 2
     player.speed = 180
 
+    myFont = love.graphics.newFont(30)
+
     zombies = {}
     bullets = {}
 
-    gameState = 2
+    gameState = 1
+    score = 0
     maxTime = 2
     timer = maxTime
 end
@@ -21,29 +26,32 @@ end
 -- the previous frame and the current one. If the game is running
 -- at 60 frames per second, then dt will equal 1/60.
 function love.update(dt)
-    if love.keyboard.isDown("d") then
-        player.x = player.x + player.speed * dt -- when dt droped, the speed increase, but it 'looks' in same speed
+    if gameState == 2 then
+        if love.keyboard.isDown("d") and player.x < love.graphics.getWidth() then
+            player.x = player.x + player.speed * dt -- when dt droped, the speed increase, but it 'looks' in same speed
+        end
+        if love.keyboard.isDown("a") and player.x > 0 then
+            player.x = player.x - player.speed * dt
+        end
+        if love.keyboard.isDown("w") and player.y > 0 then
+            player.y = player.y - player.speed * dt
+        end
+        if love.keyboard.isDown("s") and player.y < love.graphics.getHeight() then
+            player.y = player.y + player.speed * dt
+        end
     end
-    if love.keyboard.isDown("a") then
-        player.x = player.x - player.speed * dt
-    end
-    if love.keyboard.isDown("w") then
-        player.y = player.y - player.speed * dt
-    end
-    if love.keyboard.isDown("s") then
-        player.y = player.y + player.speed * dt
-    end
-    
     -- zombie movement and it's nil
     for i,z in ipairs(zombies) do
         z.x = z.x + math.cos(zombiePlayerAngle(z)) * z.speed * dt -- 對radian做cos可以得到x
         z.y = z.y + math.sin(zombiePlayerAngle(z)) * z.speed * dt
         
+        -- game over
         if distance(z.x,z.y,player.x,player.y) < 30 then
             for i,z in ipairs(zombies) do
-                zombies[i] = nil
-                
+                zombies[i] = nil 
             end
+            player.x = love.graphics.getWidth() / 2
+            player.y = love.graphics.getHeight() / 2
             gameState = 1
         end
     end
@@ -66,6 +74,7 @@ function love.update(dt)
             if distance(z.x,z.y,b.x,b.y) < 20 then
                 z.dead = true
                 b.dead = true
+                score = score + 1
             end
         end
     end
@@ -96,6 +105,16 @@ end
 
 function love.draw()
     love.graphics.draw(sprites.background,0,0)
+
+    if gameState == 1 then
+        love.graphics.setFont(myFont)
+        love.graphics.printf("Click anywhere to begin!",0,50,love.graphics.getWidth(),"center")
+        love.graphics.printf("WASD to move, LEFT click to shoot!",0,100,love.graphics.getWidth(),"center")
+
+    end
+    love.graphics.printf("Score: "..score,0,love.graphics.getHeight()-100, love.graphics.getWidth(),"center")
+
+
     love.graphics.draw(sprites.player,player.x,player.y, playerMouseAngle(), nil,nil, sprites.player:getWidth()/2,sprites.player:getHeight()/2)
 
     -- zombie shawn and it's radian
@@ -116,8 +135,14 @@ function love.keypressed(key)
 end
 
 function love.mousepressed(x,y,button)
-    if button == 1 then
+    if button == 1 and gameState == 2 then
         spawnBullet()
+    -- game start
+    elseif button == 1 and gameState == 1 then
+        gameState = 2
+        maxTime = 2
+        timer = maxTime
+        score = 0
     end
 end
 
