@@ -40,6 +40,7 @@ function love.update(dt)
             player.y = player.y + player.speed * dt
         end
     end
+
     -- zombie movement and it's nil
     for i,z in ipairs(zombies) do
         z.x = z.x + math.cos(zombiePlayerAngle(z)) * z.speed * dt -- 對radian做cos可以得到x
@@ -61,6 +62,7 @@ function love.update(dt)
         b.x = b.x + math.cos(b.direction) * b.speed * dt -- b.direction不能用playerMouseAngle()因為update是所以會一直更新方向
         b.y = b.y + math.sin(b.direction) * b.speed * dt
     end
+
     -- delete sprites
     for i=#bullets,1,-1 do
         local b = bullets[i]
@@ -68,6 +70,7 @@ function love.update(dt)
             table.remove(bullets, i)
         end
     end
+
     -- collision zombie and bullet
     for i,z in ipairs(zombies) do
         for j,b in ipairs(bullets) do
@@ -78,6 +81,16 @@ function love.update(dt)
             end
         end
     end
+    
+    -- SUPER MODE
+    if score >= 4 then 
+        for i,z in ipairs(zombies) do
+            if distance(z.x,z.y,player.x,player.y) < 300 then
+                spawnBullet2(z)
+            end
+        end
+    end
+    
     -- delete zombie
     for i=#zombies,1,-1 do
         local z = zombies[i]
@@ -86,12 +99,21 @@ function love.update(dt)
         end
     end
     -- delete bullet
+    
     for i=#bullets,1,-1 do
         local b = bullets[i]
         if b.dead == true then
             table.remove(bullets,i)
         end
     end
+    --[[ sometimes showing error: attemp to index local b
+    for i=1,#bullets,1 do
+        local b = bullets[i]
+        if b.dead == true then
+            table.remove(bullets,i)
+        end
+    end
+    ]]
     -- spawn zombie base on timer
     if gameState == 2 then
         timer = timer - dt
@@ -114,7 +136,7 @@ function love.draw()
     end
     love.graphics.printf("Score: "..score,0,love.graphics.getHeight()-100, love.graphics.getWidth(),"center")
 
-
+    
     love.graphics.draw(sprites.player,player.x,player.y, playerMouseAngle(), nil,nil, sprites.player:getWidth()/2,sprites.player:getHeight()/2)
 
     -- zombie shawn and it's radian
@@ -126,14 +148,17 @@ function love.draw()
     for i,b in ipairs(bullets) do
         love.graphics.draw(sprites.bullet, b.x, b.y, nil,0.5,nil,sprites.bullet:getWidth()/2, sprites.bullet:getHeight()/2)
     end
-end
 
+
+
+end
+--[[
 function love.keypressed(key)
     if key=="space" then
         spawnZombie()
     end
 end
-
+]]
 function love.mousepressed(x,y,button)
     if button == 1 and gameState == 2 then
         spawnBullet()
@@ -186,6 +211,16 @@ function spawnBullet()
     bullet.speed = 600
     bullet.dead = false
     bullet.direction = playerMouseAngle()
+    table.insert(bullets, bullet)
+end
+
+function spawnBullet2(enemy)
+    local bullet = {}
+    bullet.x = player.x
+    bullet.y = player.y
+    bullet.speed = 6000
+    bullet.dead = false
+    bullet.direction = zombiePlayerAngle(enemy)+ math.pi
     table.insert(bullets, bullet)
 end
 
